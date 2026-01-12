@@ -1,0 +1,219 @@
+body {
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f4f4;
+    color: black;
+}
+
+.container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #410000;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin: 10px 0 5px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+input:focus {
+    border-color: aquamarine;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.result-container {
+    display: flex;
+    /* flex-wrap: wrap; */
+    gap: 12px;
+    margin-top: 20px;
+    justify-content: space-between;
+}
+
+.result-box {
+    text-align: center;
+    margin-bottom: 20px;
+    min-width: 120px;
+}
+
+.result-title {
+    display: flex;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 5px;
+    color: #003e58;
+}
+
+.result-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.table-container {
+    margin-top: 10px;
+    overflow-x: auto;
+}
+
+.table-container h2 {
+    font-size: 25px;
+    margin: 0 0 8px 0;
+    color: #0070a0;
+}
+
+#pull-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 350px;
+    white-space: nowrap;
+}
+
+#pull-table th, #pull-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+#pull-table thead th {
+    background-color: #007bff;
+    color: white;
+}
+
+/* Accessibility & UI helper styles */
+.btn {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #0477a6;
+    background: #ffffff;
+    color: #0477a6;
+    cursor: pointer;
+    font-weight: 600;
+}
+.btn.primary {
+    background: #0477a6;
+    color: #fff;
+}
+.btn.secondary {
+    background: #f8f9fb;
+    color: #333;
+    border-color: #ccc;
+}
+.btn:focus {
+    outline: 3px solid #9ee7ff;
+    outline-offset: 2px;
+}
+
+.preset-controls {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+}
+
+.small-input {
+    width: 90px;
+    padding: 6px;
+}
+
+.sim-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.sim-results {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #003e58;
+}
+
+.visually-hidden {
+    position: absolute !important;
+    height: 1px; width: 1px;
+    overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap; border: 0; padding: 0; margin: -1px;
+}
+
+#pull-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    min-width: 350px;
+    white-space: nowrap;
+}
+
+#pull-table th, #pull-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+}
+
+#pull-table tbody tr:nth-child(odd) {
+    background: #fafafa;
+}
+
+.highlight {
+    background-color: #c6f6d5 !important; /* green-ish */
+}
+
+.table-highlight {
+    background-color: #c6f6d5 !important;
+}
+
+/* Histogram canvas for simulation distribution */
+#sim-histogram {
+    width: 100%;
+    height: 160px;
+    margin-top: 8px;
+    background: #fff;
+    border: 1px solid #ddd;
+    display: block;
+}
+
+.sim-visual {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+.sim-hist-block {
+    flex: 1 1 260px;
+    min-width: 220px;
+}
+.sim-hist-label {
+    font-weight: 700;
+    color: #003e58;
+    margin-bottom: 6px;
+}
+#sim-histogram-limited {
+    width: 100%;
+    height: 160px;
+    margin-top: 0px;
+    background: #fff;
+    border: 1px solid #ddd;
+    display: block;
+}
