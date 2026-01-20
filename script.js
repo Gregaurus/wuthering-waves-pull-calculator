@@ -120,7 +120,8 @@ function loadPreset() {
 // Simulator no longer uses copies select; fixed per-pull probability applied instead.
 
 function runMonteCarlo() {
-    const trials = Math.max(1, parseInt(simTrialsInput?.value || '1000', 10));
+    // fixed trials count per request
+    const trials = 100000;
     const pulls = Math.max(1, parseInt(simPullsInput?.value || '100', 10));
     // Progressive pity curve and base probability
     function pullProbability(pullNumber) {
@@ -254,7 +255,8 @@ if (estimateBtn) estimateBtn.addEventListener('click', async () => {
     const targetLimited = Math.max(0, parseInt(targetLimitedInput?.value || '1', 10));
     const desiredPct = Math.min(99, Math.max(1, parseFloat(targetConfidenceInput?.value || '90')));
     const desiredProb = desiredPct / 100;
-    const trialsPerEval = Math.max(100, Math.min(20000, parseInt(simTrialsEstInput?.value || '2000', 10)));
+    // fixed trials count for estimation
+    const trialsPerEval = 100000;
 
     estimateResult.textContent = 'Estimating... (this may take a moment)';
     try {
@@ -659,7 +661,8 @@ async function findMinimalPulls(targetLimited, desiredProb, trialsPerEval) {
     const plotBtn = document.getElementById('plot-curves');
     if (plotBtn) plotBtn.addEventListener('click', async () => {
         const pullsMax = Math.max(1, parseInt(simPullsInput?.value || '100', 10));
-        const trials = Math.max(100, parseInt(simTrialsInput?.value || '2000', 10));
+        // fixed trials count for plotting/visualization
+        const trials = 100000;
         const maxLimited = Math.max(1, parseInt(targetLimitedInput?.value || '1', 10));
         const origText = plotBtn.textContent;
         plotBtn.textContent = 'Working...';

@@ -31,36 +31,28 @@
             </div>
         </div>
 
-        <div class="table-container">
-            <h2>Pull Rate</h2>
-            <table id="pull-table" role="table" aria-describedby="pull-desc">
-                <caption id="pull-desc" class="visually-hidden">Table of pull costs by copy count</caption>
-                <thead>
-                    <tr>
-                        <th>Copies</th>
-                        <th>Lose Pity</th>
-                        <th>Partial Pity</th>
-                        <th>Win Pity</th>
-                        <th>Average Pull</th>
-                    </tr>
-                </thead>
-                <tbody id="pull-table-body">
-                    <!-- Rows are rendered dynamically by script.js from a data array -->
-                </tbody>
-            </table>
+        <!-- move `target-limited` input above Pull Estimation so it's shared -->
+        <div style="margin-top:12px;">
+            <label for="target-limited">How many limited 5 stars:</label>
+            <input type="number" id="target-limited" value="1" min="0" class="small-input">
         </div>
 
+        <div class="estimation-container">
+
+                <!-- Trials input commented out; using fixed 100000 trials -->
+                <!-- <label for="sim-trials">Trials (per evaluation):</label>
+                <input type="number" id="sim-trials-est" value="2000" min="100" class="small-input"> -->
                 <div class="estimation-container">
             <h2>Pull Estimation</h2>
-            <div class="sim-controls">
+            <!-- <div class="sim-controls">
                 <label for="target-limited">How many limited 5 stars:</label>
-                <input type="number" id="target-limited" value="1" min="0" class="small-input">
+                <input type="number" id="target-limited" value="1" min="0" class="small-input"> -->
 
                 <label for="target-confidence">How great are the chances (%)</label>
                 <input type="number" id="target-confidence" value="90" min="1" max="99" class="small-input">
 
-                <label for="sim-trials">Trials (per evaluation):</label>
-                <input type="number" id="sim-trials-est" value="2000" min="100" class="small-input">
+                <!-- <label for="sim-trials">Trials (per evaluation):</label>
+                <input type="number" id="sim-trials-est" value="100000" min="100" class="small-input"> -->
 
                 <button id="estimate-astrites" type="button" class="btn secondary">Estimate Astrites</button>
             </div>
@@ -73,8 +65,8 @@
                 <label for="sim-pulls">Pulls per Trial:</label>
                 <input type="number" id="sim-pulls" value="100" min="1" class="small-input">
 
-                <label for="sim-trials">Trials:</label>
-                <input type="number" id="sim-trials" value="10000" min="1" class="small-input">
+                <!-- <label for="sim-trials">Trials:</label>
+                <input type="number" id="sim-trials" value="100000" min="1" class="small-input"> -->
                 <!-- <button id="run-sim" type="button" class="btn primary">Run Simulation</button> -->
             </div>
             <div id="sim-results" class="sim-results" role="region" aria-live="polite"></div>
