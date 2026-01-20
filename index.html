@@ -44,41 +44,8 @@
                         <th>Average Pull</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                            <td>1</td>
-                            <td class="pull-amount">160</td>
-                            <td class="pull-amount">80</td>
-                            <td class="pull-amount">80</td>
-                            <td class="pull-amount">112.5</td>
-                    </tr>
-                </tbody>
-                <tbody>
-                    <tr>
-                        <td>2</td>
-                        <td class="pull-amount">320</td>
-                        <td class="pull-amount">240</td>
-                        <td class="pull-amount">160</td>
-                        <td class="pull-amount">225</td>
-                    </tr>
-                </tbody>
-                <tbody>
-                    <tr>
-                        <td>3</td>
-                        <td class="pull-amount">480</td>
-                        <td class="pull-amount">320</td>
-                        <td class="pull-amount">240</td>
-                        <td class="pull-amount">337.5</td>
-                    </tr>
-                </tbody>
-                <tbody>
-                    <tr>
-                        <td>4</td>
-                        <td class="pull-amount">640</td>
-                        <td class="pull-amount">480</td>
-                        <td class="pull-amount">320</td>
-                        <td class="pull-amount">450</td>
-                    </tr>
+                <tbody id="pull-table-body">
+                    <!-- Rows are rendered dynamically by script.js from a data array -->
                 </tbody>
             </table>
         </div>
@@ -102,24 +69,34 @@
 
         <div class="simulation-container">
             <h2>Banner Pull Trial</h2>
-            <div class="sim-controls">
+                <div class="sim-controls">
                 <label for="sim-pulls">Pulls per Trial:</label>
                 <input type="number" id="sim-pulls" value="100" min="1" class="small-input">
 
                 <label for="sim-trials">Trials:</label>
                 <input type="number" id="sim-trials" value="10000" min="1" class="small-input">
-
-                <button id="run-sim" type="button" class="btn primary">Run Simulation</button>
+                <!-- <button id="run-sim" type="button" class="btn primary">Run Simulation</button> -->
             </div>
             <div id="sim-results" class="sim-results" role="region" aria-live="polite"></div>
             <div class="sim-visual">
-                <div class="sim-hist-block">
-                    <div class="sim-hist-label">Total 5 Star Copies</div>
-                    <canvas id="sim-histogram" width="600" height="160" aria-hidden="true"></canvas>
+                <div style="width:100%;display:flex;gap:8px;align-items:center;margin-bottom:8px;">
+                    <button id="plot-curves" type="button" class="btn">Plot Cumulative Curves</button>
+                    <span style="font-size:13px;color:#555;">(Shows P(>=k limited) vs pulls)</span>
                 </div>
-                <div class="sim-hist-block">
-                    <div class="sim-hist-label">Total Limited 5 Star Copies</div>
-                    <canvas id="sim-histogram-limited" width="600" height="160" aria-hidden="true"></canvas>
+                <!--
+                    <div class="sim-hist-block">
+                        <div class="sim-hist-label">Total 5 Star Copies</div>
+                        <canvas id="sim-histogram" width="600" height="160" aria-hidden="true"></canvas>
+                    </div>
+                    <div class="sim-hist-block">
+                        <div class="sim-hist-label">Total Limited 5 Star Copies</div>
+                        <canvas id="sim-histogram-limited" width="600" height="160" aria-hidden="true"></canvas>
+                    </div>
+                -->
+                <div class="sim-hist-block" style="flex-basis:100%;">
+                    <div class="sim-hist-label">Cumulative Limited Probability Curves</div>
+                    <canvas id="sim-curve" height="240" aria-hidden="true"></canvas>
+                    <div id="sim-curve-tooltip" class="canvas-tooltip" aria-hidden="true" style="display:none"></div>
                 </div>
             </div>
         </div>
