@@ -31,6 +31,26 @@
             </div>
         </div>
 
+        <!-- Pull Rate table (reinserted) -->
+        <div class="table-container">
+            <h2>Pull Rate</h2>
+            <table id="pull-table" role="table" aria-describedby="pull-desc">
+                <caption id="pull-desc" class="visually-hidden">Table of pull costs by copy count</caption>
+                <thead>
+                    <tr>
+                        <th>Copies</th>
+                        <th>Lose Pity</th>
+                        <th>Partial Pity</th>
+                        <th>Win Pity</th>
+                        <th>Average Pull</th>
+                    </tr>
+                </thead>
+                <tbody id="pull-table-body">
+                    <!-- Rows are rendered dynamically by script.js from a data array -->
+                </tbody>
+            </table>
+        </div>
+
         <!-- move `target-limited` input above Pull Estimation so it's shared -->
         <div style="margin-top:12px;">
             <label for="target-limited">How many limited 5 stars:</label>
@@ -72,8 +92,7 @@
             <div id="sim-results" class="sim-results" role="region" aria-live="polite"></div>
             <div class="sim-visual">
                 <div style="width:100%;display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-                    <button id="plot-curves" type="button" class="btn">Plot Cumulative Curves</button>
-                    <span style="font-size:13px;color:#555;">(Shows P(>=k limited) vs pulls)</span>
+                    <button id="plot-curves" type="button" class="btn">Calculate</button>
                 </div>
                 <!--
                     <div class="sim-hist-block">

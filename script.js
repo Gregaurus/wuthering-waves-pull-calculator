@@ -256,7 +256,7 @@ if (estimateBtn) estimateBtn.addEventListener('click', async () => {
     const desiredPct = Math.min(99, Math.max(1, parseFloat(targetConfidenceInput?.value || '90')));
     const desiredProb = desiredPct / 100;
     // fixed trials count for estimation
-    const trialsPerEval = 100000;
+    const trialsPerEval = 20000;
 
     estimateResult.textContent = 'Estimating... (this may take a moment)';
     try {
