@@ -44,7 +44,7 @@ input:focus {
 
 .result-container {
     display: flex;
-    /* flex-wrap: wrap; */
+    flex-wrap: wrap;
     gap: 12px;
     margin-top: 20px;
     justify-content: space-between;
@@ -53,7 +53,8 @@ input:focus {
 .result-box {
     text-align: center;
     margin-bottom: 20px;
-    min-width: 120px;
+    flex: 1 1 30%;
+    min-width: 0; /* allow shrinking on small screens */
 }
 
 .result-title {
@@ -69,6 +70,15 @@ input:focus {
     font-size: 24px;
     font-weight: bold;
     color: #007bff;
+}
+
+/* Responsive adjustments for small screens */
+@media (max-width: 480px) {
+    .container { margin: 20px 12px; padding: 16px; }
+    .result-box { flex-basis: 100%; }
+    .result-title { font-size: 14px; }
+    .result-value { font-size: 20px; word-break: break-word; }
+    .small-input { width: 70px; }
 }
 
 .table-container {
