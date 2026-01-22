@@ -5,19 +5,19 @@ const astritesResult = document.getElementById('remaining-astrites');
 const afterglowResult = document.getElementById('bonus-afterglow');
 const pullTable = document.getElementById('pull-table');
 
-// Table generator configuration: change `NUM_ROWS` to control number of rows
-const NUM_ROWS = 4; // change this single constant to render more/less rows (e.g., 6)
+// Table generator configuration to generate table rows
+const NUM_ROWS = 4; 
 const LOSE_PER_COPY = 160;
 const WIN_PER_COPY = 80;
 const AVG_PER_COPY = 112.5;
 
+//generate pull table rows 
 function generatePullRows(numRows) {
     const out = [];
     for (let i = 1; i <= numRows; i++) {
         const copies = i;
         const losePity = LOSE_PER_COPY * copies;
         const winPity = WIN_PER_COPY * copies;
-        // partialPity uses a small multiplier pattern; adjust if you want a different rule
         const partialPity = WIN_PER_COPY * Math.floor(copies * 1.5);
         console.log(partialPity);
         const avg = AVG_PER_COPY * copies;
@@ -26,6 +26,7 @@ function generatePullRows(numRows) {
     return out;
 }
 
+//Render the pul table 
 function renderPullTable() {
     const tbody = document.getElementById('pull-table-body');
     if (!tbody) return;
@@ -54,12 +55,12 @@ const estimateBtn = document.getElementById('estimate-astrites');
 const estimateResult = document.getElementById('estimate-result');
 const simTrialsEstInput = document.getElementById('sim-trials-est');
 
+//Function to update individual table cells and whole table highlighting based on rolls
 function updateTableHighlight(rolls) {
     const cells = document.querySelectorAll('td.pull-amount');
     const pullAmounts = Array.from(cells).map(c => parseInt((c.textContent || '').trim(), 10) || 0);
     const maxPull = pullAmounts.length ? Math.max(...pullAmounts) : 0;
 
-    // Highlight individual cells where rolls >= pull amount
     cells.forEach((cell, i) => {
         const amount = pullAmounts[i];
         if (amount > 0 && rolls >= amount) {
@@ -69,7 +70,6 @@ function updateTableHighlight(rolls) {
         }
     });
 
-    // If rolls exceed the maximum pull amount, color the whole table
     if (pullTable) {
         if (maxPull > 0 && rolls > maxPull) {
             pullTable.classList.add('table-highlight');
@@ -79,6 +79,7 @@ function updateTableHighlight(rolls) {
     }
 }
 
+// Calculate rolls, remaining astrites, and afterglow based on inputs
 function calculateRolls() {
     const astrites = parseFloat(astritesInput.value) || 0;
     const rTide = parseFloat(rTideInput.value) || 0;
@@ -89,7 +90,6 @@ function calculateRolls() {
     rollsResult.textContent = rolls;
     astritesResult.textContent = remainingAstrites;
     const afterglow = Math.floor(rolls * 0.6);
-    // Format number with thousands separator for cleaner display
     try {
         afterglowResult.textContent = new Intl.NumberFormat().format(afterglow);
     } catch (e) {
@@ -106,6 +106,7 @@ function calculateRolls() {
 
 astritesInput.addEventListener('input', calculateRolls);
 rTideInput.addEventListener('input', calculateRolls);
+
 function loadPreset() {
     try {
         const raw = localStorage.getItem(PRESET_KEY);
@@ -117,145 +118,135 @@ function loadPreset() {
     } catch (e) {}
 }
 
-// Simulator no longer uses copies select; fixed per-pull probability applied instead.
+// Simulator uses fixed per-pull probability using the Monte Carlo method. || NOT USED
+// Also uses assumption-based soft & hard pity system.
+// function runMonteCarlo() {
+//     const trials = 100000;
+//     const pulls = Math.max(1, parseInt(simPullsInput?.value || '100', 10));
+//     function pullProbability(pullNumber) {
+//         if (pullNumber <= 65) return 0.008;
+//         if (pullNumber <= 70) {
+//             return 0.008 + 0.04 * (pullNumber - 65);
+//         }
+//         if (pullNumber <= 75) {
+//             return 0.008 + 0.04 * 5 + 0.08 * (pullNumber - 70);
+//         }
+//         if (pullNumber <= 79) {
+//             return 0.008 + 0.04 * 5 + 0.08 * 5 + 0.10 * (pullNumber - 75);
+//         }
+//         return 1.0;
+//     }
 
-function runMonteCarlo() {
-    // fixed trials count per request
-    const trials = 100000;
-    const pulls = Math.max(1, parseInt(simPullsInput?.value || '100', 10));
-    // Progressive pity curve and base probability
-    function pullProbability(pullNumber) {
-        // pullNumber: 1-based (1 = first pull after last copy)
-        if (pullNumber <= 65) return 0.008;
-        if (pullNumber <= 70) {
-            // pulls 66-70: increase by 4% (0.04) per additional pull over 65
-            return 0.008 + 0.04 * (pullNumber - 65);
-        }
-        if (pullNumber <= 75) {
-            // pulls 71-75: first add the 5 pulls of +4% then +8% per pull over 70
-            return 0.008 + 0.04 * 5 + 0.08 * (pullNumber - 70);
-        }
-        if (pullNumber <= 79) {
-            // pulls 76-79: add previous increases then +10% per pull over 75
-            return 0.008 + 0.04 * 5 + 0.08 * 5 + 0.10 * (pullNumber - 75);
-        }
-        // pull 80: guaranteed
-        return 1.0;
-    }
+//     let trialsWithAtLeastOne = 0;
+//     let totalSuccesses = 0;
+//     let minSuccesses = Infinity;
+//     let maxSuccesses = -Infinity;
+//     const distribution = {};
+//     const limitedBySuccesses = {}; 
+//     let trialsWithAtLeastOneLimited = 0;
+//     let totalLimited = 0;
+//     let minLimited = Infinity;
+//     let maxLimited = -Infinity;
+//     const limitedDistribution = {}; 
 
-    let trialsWithAtLeastOne = 0;
-    let totalSuccesses = 0;
-    let minSuccesses = Infinity;
-    let maxSuccesses = -Infinity;
-    const distribution = {}; // key: successes, value: count of trials
-    const limitedBySuccesses = {}; // key: successes, value: total limited copies across those trials
-    // track limited-character stats
-    let trialsWithAtLeastOneLimited = 0;
-    let totalLimited = 0;
-    let minLimited = Infinity;
-    let maxLimited = -Infinity;
-    const limitedDistribution = {}; // key: limitedThisTrial, value: count of trials
+//     // main simulation loop to check each trial successes
+//     for (let t = 0; t < trials; t++) {
+//         let successes = 0;
+//         let failuresSinceLastSuccess = 0;
+//         let mustAwardLimited = false;
+//         let limitedThisTrial = 0;
 
-    for (let t = 0; t < trials; t++) {
-        let successes = 0;
-        let failuresSinceLastSuccess = 0;
-        // 50/50 mechanic: if the previous copy failed the 50/50, the next copy is guaranteed
-        let mustAwardLimited = false;
-        let limitedThisTrial = 0;
+//         for (let i = 0; i < pulls; i++) {
+//             const pullNumber = failuresSinceLastSuccess + 1; 
+//             const p = pullProbability(pullNumber);
 
-        for (let i = 0; i < pulls; i++) {
-            const pullNumber = failuresSinceLastSuccess + 1; // 1-based
-            const p = pullProbability(pullNumber);
+//             let success = false;
+//             if (pullNumber >= 80) {
+//                 success = true;
+//             } else if (Math.random() < p) {
+//                 success = true;
+//             }
 
-            let success = false;
-            if (pullNumber >= 80) {
-                success = true;
-            } else if (Math.random() < p) {
-                success = true;
-            }
+//             if (success) {
+//                 successes++;
+//                 if (mustAwardLimited) {
+//                     limitedThisTrial++;
+//                     mustAwardLimited = false;
+//                 } else {
+//                     if (Math.random() < 0.5) {
+//                         limitedThisTrial++;
+//                         mustAwardLimited = false;
+//                     } else {
+//                         mustAwardLimited = true;
+//                     }
+//                 }
 
-            if (success) {
-                successes++;
-                // limited character check
-                if (mustAwardLimited) {
-                    limitedThisTrial++;
-                    mustAwardLimited = false;
-                } else {
-                    if (Math.random() < 0.5) {
-                        limitedThisTrial++;
-                        mustAwardLimited = false;
-                    } else {
-                        mustAwardLimited = true;
-                    }
-                }
+//                 failuresSinceLastSuccess = 0;
+//             } else {
+//                 failuresSinceLastSuccess++;
+//             }
+//         }
 
-                failuresSinceLastSuccess = 0;
-            } else {
-                failuresSinceLastSuccess++;
-            }
-        }
+//         if (successes > 0) trialsWithAtLeastOne++;
+//         totalSuccesses += successes;
+//         totalLimited += limitedThisTrial;
+//         if (limitedThisTrial > 0) trialsWithAtLeastOneLimited++;
+//         if (successes < minSuccesses) minSuccesses = successes;
+//         if (successes > maxSuccesses) maxSuccesses = successes;
+//         if (limitedThisTrial < minLimited) minLimited = limitedThisTrial;
+//         if (limitedThisTrial > maxLimited) maxLimited = limitedThisTrial;
+//         distribution[successes] = (distribution[successes] || 0) + 1;
+//         limitedBySuccesses[successes] = (limitedBySuccesses[successes] || 0) + limitedThisTrial;
+//         limitedDistribution[limitedThisTrial] = (limitedDistribution[limitedThisTrial] || 0) + 1;
+//     }
 
-        if (successes > 0) trialsWithAtLeastOne++;
-        totalSuccesses += successes;
-        totalLimited += limitedThisTrial;
-        if (limitedThisTrial > 0) trialsWithAtLeastOneLimited++;
-        if (successes < minSuccesses) minSuccesses = successes;
-        if (successes > maxSuccesses) maxSuccesses = successes;
-        if (limitedThisTrial < minLimited) minLimited = limitedThisTrial;
-        if (limitedThisTrial > maxLimited) maxLimited = limitedThisTrial;
-        distribution[successes] = (distribution[successes] || 0) + 1;
-        limitedBySuccesses[successes] = (limitedBySuccesses[successes] || 0) + limitedThisTrial;
-        limitedDistribution[limitedThisTrial] = (limitedDistribution[limitedThisTrial] || 0) + 1;
-    }
+//     const probAtLeastOne = trialsWithAtLeastOne / trials;
+//     const avgSuccessesPerTrial = totalSuccesses / trials;
 
-    const probAtLeastOne = trialsWithAtLeastOne / trials;
-    const avgSuccessesPerTrial = totalSuccesses / trials;
+//     // Build distribution table HTML (includes limited-character columns) || NOT USED
+//     let tableHtml = 
+//         // '<div>Estimated probability ± one copy in ' + pulls + ' pulls: <strong>' + (probAtLeastOne*100).toFixed(2) + '%</strong><br>' +
+//         '<div>Average copies per trial: <strong>' + avgSuccessesPerTrial.toFixed(3) + '</strong><br>' +
+//         // 'Lowest copies in a trial: <strong>' + (isFinite(minSuccesses) ? minSuccesses : 0) + '</strong><br>' +
+//         // 'Highest copies in a trial: <strong>' + (isFinite(maxSuccesses) && maxSuccesses >= 0 ? maxSuccesses : 0) + '</strong><br>' +
+//         // 'Estimated probability of ± 1 limited character in ' + pulls + ' pulls: <strong>' + ((trialsWithAtLeastOneLimited / trials) * 100).toFixed(2) + '%</strong><br>' +
+//         'Average copies of limited characters per trial: <strong>' + (totalLimited / trials).toFixed(3) + '</strong><br></div>'
+//         // 'Lowest limited copies in a trial: <strong>' + (isFinite(minLimited) ? minLimited : 0) + '</strong><br>' +
+//         // 'Highest limited copies in a trial: <strong>' + (isFinite(maxLimited) && maxLimited >= 0 ? maxLimited : 0) + '</strong></div>';
 
-    // Build distribution table HTML (includes limited-character columns)
-    let tableHtml = 
-        // '<div>Estimated probability ± one copy in ' + pulls + ' pulls: <strong>' + (probAtLeastOne*100).toFixed(2) + '%</strong><br>' +
-        '<div>Average copies per trial: <strong>' + avgSuccessesPerTrial.toFixed(3) + '</strong><br>' +
-        // 'Lowest copies in a trial: <strong>' + (isFinite(minSuccesses) ? minSuccesses : 0) + '</strong><br>' +
-        // 'Highest copies in a trial: <strong>' + (isFinite(maxSuccesses) && maxSuccesses >= 0 ? maxSuccesses : 0) + '</strong><br>' +
-        // 'Estimated probability of ± 1 limited character in ' + pulls + ' pulls: <strong>' + ((trialsWithAtLeastOneLimited / trials) * 100).toFixed(2) + '%</strong><br>' +
-        'Average copies of limited characters per trial: <strong>' + (totalLimited / trials).toFixed(3) + '</strong><br></div>'
-        // 'Lowest limited copies in a trial: <strong>' + (isFinite(minLimited) ? minLimited : 0) + '</strong><br>' +
-        // 'Highest limited copies in a trial: <strong>' + (isFinite(maxLimited) && maxLimited >= 0 ? maxLimited : 0) + '</strong></div>';
+//     tableHtml += '<table style="width:100%;border-collapse:collapse;margin-top:8px;">';
+//     tableHtml += '<thead><tr><th style="border:1px solid #ddd;padding:6px;text-align:left;">Copies</th><th style="border:1px solid #ddd;padding:6px;text-align:right;">Trial (Count)</th><th style="border:1px solid #ddd;padding:6px;text-align:right;">Percentage</th><th style="border:1px solid #ddd;padding:6px;text-align:right;">Limited (total)</th><th style="border:1px solid #ddd;padding:6px;text-align:right;">Limited (avg)</th></tr></thead>';
+//     tableHtml += '<tbody>';
+//     const maxKey = Math.max(0, maxSuccesses === -Infinity ? 0 : maxSuccesses);
+//     for (let c = 0; c <= maxKey; c++) {
+//         const cnt = distribution[c] || 0;
+//         const pct = trials > 0 ? (cnt / trials * 100) : 0;
+//         const limitedTotalForC = limitedBySuccesses[c] || 0;
+//         const limitedAvgForC = cnt > 0 ? (limitedTotalForC / cnt) : 0;
+//         tableHtml += '<tr>' +
+//             '<td style="border:1px solid #ddd;padding:6px;">' + c + '</td>' +
+//             '<td style="border:1px solid #ddd;padding:6px;text-align:right;">' + cnt + '</td>' +
+//             '<td style="border:1px solid #ddd;padding:6px;text-align:right;">' + pct.toFixed(2) + '%</td>' +
+//             '<td style="border:1px solid #ddd;padding:6px;text-align:right;">' + limitedTotalForC + '</td>' +
+//             '<td style="border:1px solid #ddd;padding:6px;text-align:right;">' + limitedAvgForC.toFixed(3) + '</td>' +
+//             '</tr>';
+//     }
+//     tableHtml += '</tbody></table>';
 
-    tableHtml += '<table style="width:100%;border-collapse:collapse;margin-top:8px;">';
-    tableHtml += '<thead><tr><th style="border:1px solid #ddd;padding:6px;text-align:left;">Copies</th><th style="border:1px solid #ddd;padding:6px;text-align:right;">Trial (Count)</th><th style="border:1px solid #ddd;padding:6px;text-align:right;">Percentage</th><th style="border:1px solid #ddd;padding:6px;text-align:right;">Limited (total)</th><th style="border:1px solid #ddd;padding:6px;text-align:right;">Limited (avg)</th></tr></thead>';
-    tableHtml += '<tbody>';
-    const maxKey = Math.max(0, maxSuccesses === -Infinity ? 0 : maxSuccesses);
-    for (let c = 0; c <= maxKey; c++) {
-        const cnt = distribution[c] || 0;
-        const pct = trials > 0 ? (cnt / trials * 100) : 0;
-        const limitedTotalForC = limitedBySuccesses[c] || 0;
-        const limitedAvgForC = cnt > 0 ? (limitedTotalForC / cnt) : 0;
-        tableHtml += '<tr>' +
-            '<td style="border:1px solid #ddd;padding:6px;">' + c + '</td>' +
-            '<td style="border:1px solid #ddd;padding:6px;text-align:right;">' + cnt + '</td>' +
-            '<td style="border:1px solid #ddd;padding:6px;text-align:right;">' + pct.toFixed(2) + '%</td>' +
-            '<td style="border:1px solid #ddd;padding:6px;text-align:right;">' + limitedTotalForC + '</td>' +
-            '<td style="border:1px solid #ddd;padding:6px;text-align:right;">' + limitedAvgForC.toFixed(3) + '</td>' +
-            '</tr>';
-    }
-    tableHtml += '</tbody></table>';
+//     simResults.innerHTML = tableHtml;
+//     try {
+//         drawHistogramTotal(distribution, 'sim-histogram');
+//         drawHistogramLimitedDistribution(limitedDistribution, 'sim-histogram-limited');
+//     } catch (e) {}
+// }
 
-    simResults.innerHTML = tableHtml;
-    try {
-        drawHistogramTotal(distribution, 'sim-histogram');
-        drawHistogramLimitedDistribution(limitedDistribution, 'sim-histogram-limited');
-    } catch (e) {}
-}
+// if (runSimBtn) runSimBtn.addEventListener('click', () => { runMonteCarlo(); });
 
-if (runSimBtn) runSimBtn.addEventListener('click', () => { runMonteCarlo(); });
-
+//Estimate if the user needs to get target limited copies with desired confidence
 if (estimateBtn) estimateBtn.addEventListener('click', async () => {
-    // read inputs
     const targetLimited = Math.max(0, parseInt(targetLimitedInput?.value || '1', 10));
     const desiredPct = Math.min(99, Math.max(1, parseFloat(targetConfidenceInput?.value || '90')));
     const desiredProb = desiredPct / 100;
-    // fixed trials count for estimation
     const trialsPerEval = 20000;
 
     estimateResult.textContent = 'Estimating... (this may take a moment)';
@@ -291,6 +282,7 @@ if (estimateBtn) estimateBtn.addEventListener('click', async () => {
 
 window.addEventListener('DOMContentLoaded', () => { loadPreset(); renderPullTable(); calculateRolls(); });
 
+// Create and setup canvas for drawing histograms || NOT USED
 function _setupCanvas(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
@@ -304,6 +296,7 @@ function _setupCanvas(canvasId) {
     return { canvas, ctx, cssWidth, cssHeight };
 }
 
+// Draw histogram for total distribution
 function drawHistogramTotal(distribution, canvasId) {
     const info = _setupCanvas(canvasId);
     if (!info) return;
@@ -331,6 +324,7 @@ function drawHistogramTotal(distribution, canvasId) {
     ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right'; ctx.fillText(String(maxCount), cssWidth - 6, padding + 10);
 }
 
+// Draw histogram for limited-by-successes distribution
 function drawHistogramAvgLimited(limitedBySuccesses, distribution, canvasId) {
     const info = _setupCanvas(canvasId);
     if (!info) return;
@@ -361,6 +355,7 @@ function drawHistogramAvgLimited(limitedBySuccesses, distribution, canvasId) {
     ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right'; ctx.fillText(String(maxTotal), cssWidth - 6, padding + 10);
 }
 
+// Draw histogram for limited-distribution
 function drawHistogramLimitedDistribution(limitedDistribution, canvasId) {
     const info = _setupCanvas(canvasId);
     if (!info) return;
@@ -392,6 +387,7 @@ function drawHistogramLimitedDistribution(limitedDistribution, canvasId) {
 }
 
 // Simulation helper used by estimator: returns limitedDistribution and trials
+// Uses an assumption-based soft & hard pity system.
 function simulateTrials(pulls, trials) {
     const distribution = {};
     const limitedBySuccesses = {};
