@@ -325,66 +325,66 @@ function drawHistogramTotal(distribution, canvasId) {
 }
 
 // Draw histogram for limited-by-successes distribution
-function drawHistogramAvgLimited(limitedBySuccesses, distribution, canvasId) {
-    const info = _setupCanvas(canvasId);
-    if (!info) return;
-    const { ctx, cssWidth, cssHeight } = info;
-    ctx.clearRect(0, 0, cssWidth, cssHeight);
-    // Build totals per success-count bucket
-    const keys = Object.keys(distribution).map(k => parseInt(k, 10)).filter(n => !isNaN(n)).sort((a, b) => a - b);
-    const maxKey = keys.length ? Math.max(...keys) : 0;
-    const totals = [];
-    let maxTotal = 1;
-    for (let i = 0; i <= maxKey; i++) {
-        const totalLimited = limitedBySuccesses[i] || 0;
-        totals.push(totalLimited);
-        if (totalLimited > maxTotal) maxTotal = totalLimited;
-    }
+// function drawHistogramAvgLimited(limitedBySuccesses, distribution, canvasId) {
+//     const info = _setupCanvas(canvasId);
+//     if (!info) return;
+//     const { ctx, cssWidth, cssHeight } = info;
+//     ctx.clearRect(0, 0, cssWidth, cssHeight);
+//     // Build totals per success-count bucket
+//     const keys = Object.keys(distribution).map(k => parseInt(k, 10)).filter(n => !isNaN(n)).sort((a, b) => a - b);
+//     const maxKey = keys.length ? Math.max(...keys) : 0;
+//     const totals = [];
+//     let maxTotal = 1;
+//     for (let i = 0; i <= maxKey; i++) {
+//         const totalLimited = limitedBySuccesses[i] || 0;
+//         totals.push(totalLimited);
+//         if (totalLimited > maxTotal) maxTotal = totalLimited;
+//     }
 
-    const padding = 10; const axisHeight = 20; const drawHeight = cssHeight - padding - axisHeight; const availableWidth = Math.max(20, cssWidth - padding * 2); const barCount = totals.length || 1; const barWidth = availableWidth / barCount;
+//     const padding = 10; const axisHeight = 20; const drawHeight = cssHeight - padding - axisHeight; const availableWidth = Math.max(20, cssWidth - padding * 2); const barCount = totals.length || 1; const barWidth = availableWidth / barCount;
 
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cssWidth, cssHeight);
-    for (let i = 0; i < barCount; i++) {
-        const val = totals[i];
-        const h = (val / maxTotal) * drawHeight;
-        const x = padding + i * barWidth;
-        const y = padding + (drawHeight - h);
-        ctx.fillStyle = '#a647a6'; ctx.fillRect(x + 1, y, Math.max(2, barWidth - 2), h);
-        ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(String(i), x + barWidth / 2, cssHeight - 6);
-    }
-    ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right'; ctx.fillText(String(maxTotal), cssWidth - 6, padding + 10);
-}
+//     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cssWidth, cssHeight);
+//     for (let i = 0; i < barCount; i++) {
+//         const val = totals[i];
+//         const h = (val / maxTotal) * drawHeight;
+//         const x = padding + i * barWidth;
+//         const y = padding + (drawHeight - h);
+//         ctx.fillStyle = '#a647a6'; ctx.fillRect(x + 1, y, Math.max(2, barWidth - 2), h);
+//         ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(String(i), x + barWidth / 2, cssHeight - 6);
+//     }
+//     ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right'; ctx.fillText(String(maxTotal), cssWidth - 6, padding + 10);
+// }
 
 // Draw histogram for limited-distribution
-function drawHistogramLimitedDistribution(limitedDistribution, canvasId) {
-    const info = _setupCanvas(canvasId);
-    if (!info) return;
-    const { ctx, cssWidth, cssHeight } = info;
-    ctx.clearRect(0, 0, cssWidth, cssHeight);
+// function drawHistogramLimitedDistribution(limitedDistribution, canvasId) {
+//     const info = _setupCanvas(canvasId);
+//     if (!info) return;
+//     const { ctx, cssWidth, cssHeight } = info;
+//     ctx.clearRect(0, 0, cssWidth, cssHeight);
 
-    const keys = Object.keys(limitedDistribution).map(k => parseInt(k, 10)).filter(n => !isNaN(n)).sort((a, b) => a - b);
-    const maxKey = keys.length ? Math.max(...keys) : 0;
-    const counts = [];
-    let maxCount = 1;
-    for (let i = 0; i <= maxKey; i++) {
-        const c = limitedDistribution[i] || 0;
-        counts.push(c);
-        if (c > maxCount) maxCount = c;
-    }
+//     const keys = Object.keys(limitedDistribution).map(k => parseInt(k, 10)).filter(n => !isNaN(n)).sort((a, b) => a - b);
+//     const maxKey = keys.length ? Math.max(...keys) : 0;
+//     const counts = [];
+//     let maxCount = 1;
+//     for (let i = 0; i <= maxKey; i++) {
+//         const c = limitedDistribution[i] || 0;
+//         counts.push(c);
+//         if (c > maxCount) maxCount = c;
+//     }
 
-    const padding = 10; const axisHeight = 20; const drawHeight = cssHeight - padding - axisHeight; const availableWidth = Math.max(20, cssWidth - padding * 2); const barCount = counts.length || 1; const barWidth = availableWidth / barCount;
-    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cssWidth, cssHeight);
+//     const padding = 10; const axisHeight = 20; const drawHeight = cssHeight - padding - axisHeight; const availableWidth = Math.max(20, cssWidth - padding * 2); const barCount = counts.length || 1; const barWidth = availableWidth / barCount;
+//     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cssWidth, cssHeight);
 
-    for (let i = 0; i < barCount; i++) {
-        const cnt = counts[i];
-        const h = (cnt / maxCount) * drawHeight;
-        const x = padding + i * barWidth;
-        const y = padding + (drawHeight - h);
-        ctx.fillStyle = '#a647a6'; ctx.fillRect(x + 1, y, Math.max(2, barWidth - 2), h);
-        ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(String(i), x + barWidth / 2, cssHeight - 6);
-    }
-    ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right'; ctx.fillText(String(maxCount), cssWidth - 6, padding + 10);
-}
+//     for (let i = 0; i < barCount; i++) {
+//         const cnt = counts[i];
+//         const h = (cnt / maxCount) * drawHeight;
+//         const x = padding + i * barWidth;
+//         const y = padding + (drawHeight - h);
+//         ctx.fillStyle = '#a647a6'; ctx.fillRect(x + 1, y, Math.max(2, barWidth - 2), h);
+//         ctx.fillStyle = '#333'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(String(i), x + barWidth / 2, cssHeight - 6);
+//     }
+//     ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right'; ctx.fillText(String(maxCount), cssWidth - 6, padding + 10);
+// }
 
 // Simulation helper used by estimator: returns limitedDistribution and trials
 // Uses an assumption-based soft & hard pity system.
