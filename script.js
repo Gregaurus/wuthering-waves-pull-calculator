@@ -309,7 +309,12 @@ function drawHistogramTotal(distribution, canvasId) {
     let maxCount = 1;
     for (let i = 0; i <= maxKey; i++) { const c = distribution[i] || 0; counts.push(c); if (c > maxCount) maxCount = c; }
 
-    const padding = 10; const axisHeight = 20; const drawHeight = cssHeight - padding - axisHeight; const availableWidth = Math.max(20, cssWidth - padding * 2); const barCount = counts.length || 1; const barWidth = availableWidth / barCount;
+    const padding = 10; 
+    const axisHeight = 20; 
+    const drawHeight = cssHeight - padding - axisHeight; 
+    const availableWidth = Math.max(20, cssWidth - padding * 2); 
+    const barCount = counts.length || 1; 
+    const barWidth = availableWidth / barCount;
 
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cssWidth, cssHeight);
 
@@ -631,7 +636,13 @@ async function findMinimalPulls(targetLimited, desiredProb, trialsPerEval) {
                         const val = (typeof arr[idx] === 'number') ? arr[idx] : (arr[arr.length-1] || 0);
                         const p = (val || 0) * 100;
                         const color = lineColors[k % lineColors.length];
-                        html += '<div style="display:flex;gap:8px;align-items:center;margin:2px 0;"><span style="width:10px;height:10px;display:inline-block;background:' + color + ';"></span><span>>= ' + (k+1) + ':</span><span style="margin-left:auto;font-weight:700;">' + p.toFixed(2) + '%</span></div>';
+                        html += `
+                                <div class="legend-row">
+                                    <span class="legend-color" style="background:${color}"></span>
+                                    <span>>= ${k + 1}:</span>
+                                    <span class="legend-value">${p.toFixed(2)}%</span>
+                                </div>
+                                `;
                     }
                     tooltip.innerHTML = html; tooltip.style.display = 'block';
 
