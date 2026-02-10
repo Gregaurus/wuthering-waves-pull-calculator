@@ -6,7 +6,7 @@ const afterglowResult = document.getElementById('bonus-afterglow');
 const pullTable = document.getElementById('pull-table');
 
 // Table generator configuration to generate table rows
-const NUM_ROWS = 4; 
+const NUM_ROWS = 4;
 const LOSE_PER_COPY = 160;
 const WIN_PER_COPY = 80;
 const AVG_PER_COPY = 112.5;
@@ -101,7 +101,7 @@ function calculateRolls() {
     try {
         const preset = { astrites: astritesInput.value || '', rTide: rTideInput.value || '' };
         localStorage.setItem(PRESET_KEY, JSON.stringify(preset));
-    } catch (e) {}
+    } catch (e) { }
 }
 
 astritesInput.addEventListener('input', calculateRolls);
@@ -115,7 +115,7 @@ function loadPreset() {
             if (p.astrites !== undefined) astritesInput.value = p.astrites;
             if (p.rTide !== undefined) rTideInput.value = p.rTide;
         }
-    } catch (e) {}
+    } catch (e) { }
 }
 
 // Simulator uses fixed per-pull probability using the Monte Carlo method. || NOT USED
@@ -273,8 +273,8 @@ if (estimateBtn) estimateBtn.addEventListener('click', async () => {
 
         estimateResult.innerHTML = 'Pulls needed: <strong>' + pullsNeeded + '</strong><br>' +
             'Astrites needed (approx): <strong>' + astritesNeeded + '</strong><br>' +
-            'Estimated probability at ' + pullsNeeded + ' pulls: <strong>' + (pEst*100).toFixed(2) + '%</strong><br>' +
-            '95% CI: <strong>' + (ci.lo*100).toFixed(2) + '%</strong> – <strong>' + (ci.hi*100).toFixed(2) + '%</strong>';
+            'Estimated probability at ' + pullsNeeded + ' pulls: <strong>' + (pEst * 100).toFixed(2) + '%</strong><br>' +
+            '95% CI: <strong>' + (ci.lo * 100).toFixed(2) + '%</strong> – <strong>' + (ci.hi * 100).toFixed(2) + '%</strong>';
     } catch (e) {
         estimateResult.textContent = 'Estimation failed: ' + (e && e.message ? e.message : String(e));
     }
@@ -309,12 +309,7 @@ function drawHistogramTotal(distribution, canvasId) {
     let maxCount = 1;
     for (let i = 0; i <= maxKey; i++) { const c = distribution[i] || 0; counts.push(c); if (c > maxCount) maxCount = c; }
 
-    const padding = 10; 
-    const axisHeight = 20; 
-    const drawHeight = cssHeight - padding - axisHeight; 
-    const availableWidth = Math.max(20, cssWidth - padding * 2); 
-    const barCount = counts.length || 1; 
-    const barWidth = availableWidth / barCount;
+    const padding = 10; const axisHeight = 20; const drawHeight = cssHeight - padding - axisHeight; const availableWidth = Math.max(20, cssWidth - padding * 2); const barCount = counts.length || 1; const barWidth = availableWidth / barCount;
 
     ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cssWidth, cssHeight);
 
@@ -443,9 +438,9 @@ function wilsonInterval(k, n, alpha = 0.05) {
     if (n <= 0) return { lo: 0, hi: 0 };
     const z = 1.96; // for 95% by default when alpha = 0.05
     const phat = k / n;
-    const denom = 1 + (z*z)/n;
-    const center = phat + (z*z)/(2*n);
-    const adj = z * Math.sqrt((phat*(1-phat) + (z*z)/(4*n)) / n);
+    const denom = 1 + (z * z) / n;
+    const center = phat + (z * z) / (2 * n);
+    const adj = z * Math.sqrt((phat * (1 - phat) + (z * z) / (4 * n)) / n);
     const lo = Math.max(0, (center - adj) / denom);
     const hi = Math.min(1, (center + adj) / denom);
     return { lo, hi };
@@ -493,188 +488,182 @@ async function findMinimalPulls(targetLimited, desiredProb, trialsPerEval) {
         else lo = mid + 1;
         await new Promise(r => setTimeout(r, 10));
     }
-        return result;
+    return result;
+}
+
+// Simulate cumulative probabilities for pulls 1..pullsMax and return arrays P(>=k) for k=1..maxLimited
+function simulateCumulative(pullsMax, trials, maxLimited) {
+    const countsPerK = [];
+    for (let k = 0; k < maxLimited; k++) {
+        countsPerK.push(new Array(pullsMax).fill(0));
     }
 
-    // Simulate cumulative probabilities for pulls 1..pullsMax and return arrays P(>=k) for k=1..maxLimited
-    function simulateCumulative(pullsMax, trials, maxLimited) {
-        const countsPerK = [];
-        for (let k = 0; k < maxLimited; k++) {
-            countsPerK.push(new Array(pullsMax).fill(0));
-        }
+    function pullProbability(pullNumber) {
+        if (pullNumber <= 65) return 0.008;
+        if (pullNumber <= 70) return 0.008 + 0.04 * (pullNumber - 65);
+        if (pullNumber <= 75) return 0.008 + 0.04 * 5 + 0.08 * (pullNumber - 70);
+        if (pullNumber <= 79) return 0.008 + 0.04 * 5 + 0.08 * 5 + 0.10 * (pullNumber - 75);
+        return 1.0;
+    }
 
-        function pullProbability(pullNumber) {
-            if (pullNumber <= 65) return 0.008;
-            if (pullNumber <= 70) return 0.008 + 0.04 * (pullNumber - 65);
-            if (pullNumber <= 75) return 0.008 + 0.04 * 5 + 0.08 * (pullNumber - 70);
-            if (pullNumber <= 79) return 0.008 + 0.04 * 5 + 0.08 * 5 + 0.10 * (pullNumber - 75);
-            return 1.0;
-        }
+    for (let t = 0; t < trials; t++) {
+        let failuresSinceLastSuccess = 0;
+        let mustAwardLimited = false;
+        let limitedCount = 0;
 
-        for (let t = 0; t < trials; t++) {
-            let failuresSinceLastSuccess = 0;
-            let mustAwardLimited = false;
-            let limitedCount = 0;
+        for (let i = 0; i < pullsMax; i++) {
+            const pullNumber = failuresSinceLastSuccess + 1;
+            const p = pullProbability(pullNumber);
+            let success = false;
+            if (pullNumber >= 80) success = true;
+            else if (Math.random() < p) success = true;
 
-            for (let i = 0; i < pullsMax; i++) {
-                const pullNumber = failuresSinceLastSuccess + 1;
-                const p = pullProbability(pullNumber);
-                let success = false;
-                if (pullNumber >= 80) success = true;
-                else if (Math.random() < p) success = true;
-
-                if (success) {
-                    // limited award logic (50/50 with guarantee after loss)
-                    let awardedLimited = false;
-                    if (mustAwardLimited) {
+            if (success) {
+                // limited award logic (50/50 with guarantee after loss)
+                let awardedLimited = false;
+                if (mustAwardLimited) {
+                    awardedLimited = true;
+                    mustAwardLimited = false;
+                } else {
+                    if (Math.random() < 0.5) {
                         awardedLimited = true;
                         mustAwardLimited = false;
                     } else {
-                        if (Math.random() < 0.5) {
-                            awardedLimited = true;
-                            mustAwardLimited = false;
-                        } else {
-                            mustAwardLimited = true;
-                        }
+                        mustAwardLimited = true;
                     }
-                    if (awardedLimited) limitedCount++;
-                    failuresSinceLastSuccess = 0;
-                } else {
-                    failuresSinceLastSuccess++;
                 }
-
-                // record whether we've reached at least k limited for each k
-                for (let k = 1; k <= maxLimited; k++) {
-                    if (limitedCount >= k) countsPerK[k-1][i]++;
-                }
+                if (awardedLimited) limitedCount++;
+                failuresSinceLastSuccess = 0;
+            } else {
+                failuresSinceLastSuccess++;
             }
-        }
 
-        // convert counts to probabilities
-        const probsPerK = countsPerK.map(arr => arr.map(c => c / trials));
-        return probsPerK;
-    }
-
-    function drawCumulativeCurves(probsPerK, canvasId) {
-        const info = _setupCanvas(canvasId);
-        if (!info) return;
-        const { ctx, cssWidth, cssHeight } = info;
-        ctx.clearRect(0, 0, cssWidth, cssHeight);
-
-        const padding = 40;
-        const plotW = cssWidth - padding * 1.5;
-        const plotH = cssHeight - padding * 1.2;
-        const originX = padding;
-        const originY = cssHeight - padding / 2;
-
-        // background
-        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cssWidth, cssHeight);
-
-        const pullsMax = probsPerK[0] ? probsPerK[0].length : 1;
-        // draw axes
-        ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
-        ctx.beginPath(); // x axis
-        ctx.moveTo(originX, originY); ctx.lineTo(originX + plotW, originY); ctx.stroke();
-        ctx.beginPath(); // y axis
-        ctx.moveTo(originX, originY); ctx.lineTo(originX, originY - plotH); ctx.stroke();
-
-        // y ticks
-        ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
-        for (let i = 0; i <= 5; i++) {
-            const yVal = i / 5; const y = originY - (yVal * plotH);
-            ctx.fillText((yVal*100).toFixed(0) + '%', originX - 6, y + 4);
-            ctx.strokeStyle = '#eee'; ctx.beginPath(); ctx.moveTo(originX, y); ctx.lineTo(originX + plotW, y); ctx.stroke();
-        }
-
-        // x ticks
-        ctx.textAlign = 'center'; ctx.font = '10px sans-serif';
-        const step = Math.max(1, Math.floor(pullsMax / 8));
-        for (let x = 0; x <= pullsMax; x += step) {
-            const px = originX + (x / Math.max(1, pullsMax)) * plotW;
-            ctx.fillStyle = '#333'; ctx.fillText(String(x), px, originY + 14);
-        }
-
-        // colors
-        const colors = ['#e6194b','#3cb44b','#ffe119','#0082c8','#f58231','#911eb4','#46f0f0','#f032e6','#d2f53c','#fabebe'];
-
-        // draw lines for each k
-        for (let k = 0; k < probsPerK.length; k++) {
-            const arr = probsPerK[k];
-            ctx.beginPath();
-            for (let i = 0; i < arr.length; i++) {
-                const x = originX + (i / Math.max(1, arr.length - 1)) * plotW;
-                const y = originY - (arr[i] * plotH);
-                if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-            }
-            ctx.strokeStyle = colors[k % colors.length]; ctx.lineWidth = 2; ctx.stroke();
-        }
-
-        // store curve data for hover interactions
-        const canvas = document.getElementById(canvasId);
-        if (canvas) {
-            canvas._curveData = { probsPerK, originX, originY, plotW, plotH, pullsMax, colors };
-            // add hover tooltip behavior once
-            const tooltip = document.getElementById('sim-curve-tooltip');
-            if (tooltip && !canvas._hasHover) {
-                canvas._hasHover = true;
-                canvas.addEventListener('mousemove', (ev) => {
-                    const data = canvas._curveData;
-                    if (!data) { tooltip.style.display = 'none'; return; }
-                    const { probsPerK, originX: oX, plotW: pW, pullsMax: pMax, colors: lineColors } = data;
-                    const rect = canvas.getBoundingClientRect();
-                    const x = ev.clientX - rect.left; const y = ev.clientY - rect.top;
-                    const relX = x - oX;
-                    if (relX < 0 || relX > pW) { tooltip.style.display = 'none'; return; }
-                    const ratio = Math.min(1, Math.max(0, relX / pW));
-                    let idx = Math.floor(ratio * pMax);
-                    if (idx >= pMax) idx = pMax - 1;
-                    if (idx < 0) idx = 0;
-
-                    let html = '<div style="font-weight:700;margin-bottom:6px;">Pulls: ' + (idx+1) + '</div>';
-                    for (let k = 0; k < probsPerK.length; k++) {
-                        const arr = probsPerK[k] || [];
-                        const val = (typeof arr[idx] === 'number') ? arr[idx] : (arr[arr.length-1] || 0);
-                        const p = (val || 0) * 100;
-                        const color = lineColors[k % lineColors.length];
-                        html += `
-                                <div class="legend-row">
-                                    <span class="legend-color" style="background:${color}"></span>
-                                    <span>>= ${k + 1}:</span>
-                                    <span class="legend-value">${p.toFixed(2)}%</span>
-                                </div>
-                                `;
-                    }
-                    tooltip.innerHTML = html; tooltip.style.display = 'block';
-
-                    const parentRect = canvas.parentElement.getBoundingClientRect();
-                    const offsetX = ev.clientX - parentRect.left;
-                    const offsetY = ev.clientY - parentRect.top;
-                    tooltip.style.left = (offsetX + 12) + 'px';
-                    tooltip.style.top = (offsetY + 12) + 'px';
-                    const ttRect = tooltip.getBoundingClientRect();
-                    if (ttRect.right > parentRect.right) {
-                        tooltip.style.left = (offsetX - ttRect.width - 12) + 'px';
-                    }
-                    if (ttRect.bottom > parentRect.bottom) {
-                        tooltip.style.top = (offsetX - ttRect.height - 12) + 'px';
-                    }
-                });
-                canvas.addEventListener('mouseleave', () => { const tooltip = document.getElementById('sim-curve-tooltip'); if (tooltip) tooltip.style.display = 'none'; });
+            // record whether we've reached at least k limited for each k
+            for (let k = 1; k <= maxLimited; k++) {
+                if (limitedCount >= k) countsPerK[k - 1][i]++;
             }
         }
     }
 
-    // hook up Plot button
-    const plotBtn = document.getElementById('plot-curves');
-    if (plotBtn) plotBtn.addEventListener('click', async () => {
-        const pullsMax = Math.max(1, parseInt(simPullsInput?.value || '100', 10));
-        // fixed trials count for plotting/visualization
-        const trials = 100000;
-        const maxLimited = Math.max(1, parseInt(targetLimitedInput?.value || '1', 10));
-        const origText = plotBtn.textContent;
-        plotBtn.textContent = 'Working...';
-        await new Promise(r => setTimeout(r, 10));
-        const probs = simulateCumulative(pullsMax, trials, maxLimited);
-        drawCumulativeCurves(probs, 'sim-curve');
-        plotBtn.textContent = origText;
-    });
+    // convert counts to probabilities
+    const probsPerK = countsPerK.map(arr => arr.map(c => c / trials));
+    return probsPerK;
+}
+
+function drawCumulativeCurves(probsPerK, canvasId) {
+    const info = _setupCanvas(canvasId);
+    if (!info) return;
+    const { ctx, cssWidth, cssHeight } = info;
+    ctx.clearRect(0, 0, cssWidth, cssHeight);
+
+    const padding = 40;
+    const plotW = cssWidth - padding * 1.5;
+    const plotH = cssHeight - padding * 1.2;
+    const originX = padding;
+    const originY = cssHeight - padding / 2;
+
+    // background
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cssWidth, cssHeight);
+
+    const pullsMax = probsPerK[0] ? probsPerK[0].length : 1;
+    // draw axes
+    ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
+    ctx.beginPath(); // x axis
+    ctx.moveTo(originX, originY); ctx.lineTo(originX + plotW, originY); ctx.stroke();
+    ctx.beginPath(); // y axis
+    ctx.moveTo(originX, originY); ctx.lineTo(originX, originY - plotH); ctx.stroke();
+
+    // y ticks
+    ctx.fillStyle = '#333'; ctx.font = '11px sans-serif'; ctx.textAlign = 'right';
+    for (let i = 0; i <= 5; i++) {
+        const yVal = i / 5; const y = originY - (yVal * plotH);
+        ctx.fillText((yVal * 100).toFixed(0) + '%', originX - 6, y + 4);
+        ctx.strokeStyle = '#eee'; ctx.beginPath(); ctx.moveTo(originX, y); ctx.lineTo(originX + plotW, y); ctx.stroke();
+    }
+
+    // x ticks
+    ctx.textAlign = 'center'; ctx.font = '10px sans-serif';
+    const step = Math.max(1, Math.floor(pullsMax / 8));
+    for (let x = 0; x <= pullsMax; x += step) {
+        const px = originX + (x / Math.max(1, pullsMax)) * plotW;
+        ctx.fillStyle = '#333'; ctx.fillText(String(x), px, originY + 14);
+    }
+
+    // colors
+    const colors = ['#e6194b', '#3cb44b', '#ffe119', '#0082c8', '#f58231', '#911eb4', '#46f0f0', '#f032e6', '#d2f53c', '#fabebe'];
+
+    // draw lines for each k
+    for (let k = 0; k < probsPerK.length; k++) {
+        const arr = probsPerK[k];
+        ctx.beginPath();
+        for (let i = 0; i < arr.length; i++) {
+            const x = originX + (i / Math.max(1, arr.length - 1)) * plotW;
+            const y = originY - (arr[i] * plotH);
+            if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.strokeStyle = colors[k % colors.length]; ctx.lineWidth = 2; ctx.stroke();
+    }
+
+    // store curve data for hover interactions
+    const canvas = document.getElementById(canvasId);
+    if (canvas) {
+        canvas._curveData = { probsPerK, originX, originY, plotW, plotH, pullsMax, colors };
+        // add hover tooltip behavior once
+        const tooltip = document.getElementById('sim-curve-tooltip');
+        if (tooltip && !canvas._hasHover) {
+            canvas._hasHover = true;
+            canvas.addEventListener('mousemove', (ev) => {
+                const data = canvas._curveData;
+                if (!data) { tooltip.style.display = 'none'; return; }
+                const { probsPerK, originX: oX, plotW: pW, pullsMax: pMax, colors: lineColors } = data;
+                const rect = canvas.getBoundingClientRect();
+                const x = ev.clientX - rect.left; const y = ev.clientY - rect.top;
+                const relX = x - oX;
+                if (relX < 0 || relX > pW) { tooltip.style.display = 'none'; return; }
+                const ratio = Math.min(1, Math.max(0, relX / pW));
+                let idx = Math.floor(ratio * pMax);
+                if (idx >= pMax) idx = pMax - 1;
+                if (idx < 0) idx = 0;
+
+                let html = '<div style="font-weight:700;margin-bottom:6px;">Pulls: ' + (idx + 1) + '</div>';
+                for (let k = 0; k < probsPerK.length; k++) {
+                    const arr = probsPerK[k] || [];
+                    const val = (typeof arr[idx] === 'number') ? arr[idx] : (arr[arr.length - 1] || 0);
+                    const p = (val || 0) * 100;
+                    const color = lineColors[k % lineColors.length];
+                    html += '<div style="display:flex;gap:8px;align-items:center;margin:2px 0;"><span style="width:10pxheight:10px;display:inline-block;background:' + color + ';"></span><span>>= ' + (k + 1) + ':</span><span style="margin-left:auto;font-weight:700;">' + p.toFixed(2) + '%</span></div>';
+                }
+                tooltip.innerHTML = html; tooltip.style.display = 'block';
+
+                const parentRect = canvas.parentElement.getBoundingClientRect();
+                const offsetX = ev.clientX - parentRect.left;
+                const offsetY = ev.clientY - parentRect.top;
+                tooltip.style.left = (offsetX + 12) + 'px';
+                tooltip.style.top = (offsetY + 12) + 'px';
+                const ttRect = tooltip.getBoundingClientRect();
+                if (ttRect.right > parentRect.right) {
+                    tooltip.style.left = (offsetX - ttRect.width - 12) + 'px';
+                }
+                if (ttRect.bottom > parentRect.bottom) {
+                    tooltip.style.top = (offsetX - ttRect.height - 12) + 'px';
+                }
+            });
+            canvas.addEventListener('mouseleave', () => { const tooltip = document.getElementById('sim-curve-tooltip'); if (tooltip) tooltip.style.display = 'none'; });
+        }
+    }
+}
+
+// hook up Plot button
+const plotBtn = document.getElementById('plot-curves');
+if (plotBtn) plotBtn.addEventListener('click', async () => {
+    const pullsMax = Math.max(1, parseInt(simPullsInput?.value || '100', 10));
+    // fixed trials count for plotting/visualization
+    const trials = 100000;
+    const maxLimited = Math.max(1, parseInt(targetLimitedInput?.value || '1', 10));
+    const origText = plotBtn.textContent;
+    plotBtn.textContent = 'Working...';
+    await new Promise(r => setTimeout(r, 10));
+    const probs = simulateCumulative(pullsMax, trials, maxLimited);
+    drawCumulativeCurves(probs, 'sim-curve');
+    plotBtn.textContent = origText;
+});
