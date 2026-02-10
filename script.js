@@ -631,7 +631,7 @@ function drawCumulativeCurves(probsPerK, canvasId) {
                     const val = (typeof arr[idx] === 'number') ? arr[idx] : (arr[arr.length - 1] || 0);
                     const p = (val || 0) * 100;
                     const color = lineColors[k % lineColors.length];
-                    html += '<div style="display:flex;gap:8px;align-items:center;margin:2px 0;"><span style="width:10px;height:10px;display:inline-block;background:' + color + ';"></span><span>>= ' + (k + 1) + ':</span><span style="margin-left:auto;font-weight:700;">' + p.toFixed(2) + '%</span></div>';
+                    html += '<div style="display:flex;gap:8px;align-items:center;margin:2px 0;"><span style="width:10pxheight:10px;display:inline-block;background:' + color + ';"></span><span>>= ' + (k + 1) + ':</span><span style="margin-left:auto;font-weight:700;">' + p.toFixed(2) + '%</span></div>';
                 }
                 tooltip.innerHTML = html; tooltip.style.display = 'block';
 
