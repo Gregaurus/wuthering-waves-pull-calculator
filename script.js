@@ -9,6 +9,8 @@ const simPullsInput         = document.getElementById('sim-pulls');
 const simResults            = document.getElementById('sim-results');
 const targetLimitedInput    = document.getElementById('target-limited');
 const targetConfidenceInput = document.getElementById('target-confidence');
+const pityCountInput        = document.getElementById('pity-count');
+const fiftyFiftyInput       = document.getElementById('fifty-fifty-state');
 const estimateBtn           = document.getElementById('estimate-astrites');
 const estimateResult        = document.getElementById('estimate-result');
 
@@ -82,8 +84,10 @@ function calculateRolls() {
     updateTableHighlight(rolls);
     try {
         localStorage.setItem(PRESET_KEY, JSON.stringify({
-            astrites: astritesInput.value,
-            rTide:    rTideInput.value,
+            astrites:   astritesInput.value,
+            rTide:      rTideInput.value,
+            pityCount:  pityCountInput?.value  ?? '0',
+            fiftyFifty: fiftyFiftyInput?.checked ? 'guaranteed' : '50/50',
         }));
     } catch { }
 }
@@ -93,13 +97,17 @@ function loadPreset() {
         const raw = localStorage.getItem(PRESET_KEY);
         if (!raw) return;
         const p = JSON.parse(raw);
-        if (p.astrites !== undefined) astritesInput.value = p.astrites;
-        if (p.rTide    !== undefined) rTideInput.value    = p.rTide;
+        if (p.astrites   !== undefined) astritesInput.value  = p.astrites;
+        if (p.rTide      !== undefined) rTideInput.value     = p.rTide;
+        if (p.pityCount  !== undefined && pityCountInput)  pityCountInput.value  = p.pityCount;
+        if (p.fiftyFifty !== undefined && fiftyFiftyInput) fiftyFiftyInput.checked = p.fiftyFifty === 'guaranteed';
     } catch { }
 }
 
-astritesInput.addEventListener('input', calculateRolls);
-rTideInput.addEventListener('input', calculateRolls);
+astritesInput.addEventListener('input',  calculateRolls);
+rTideInput.addEventListener('input',    calculateRolls);
+pityCountInput?.addEventListener('input',   calculateRolls);
+fiftyFiftyInput?.addEventListener('change', calculateRolls);
 
 window.addEventListener('DOMContentLoaded', () => {
     loadPreset();
@@ -119,7 +127,7 @@ function pullProbability(pullNumber) {
 
 // ── Monte Carlo Simulation ────────────────────────────────────────────────────
 // Runs trials and returns per-copy distributions.
-function simulateTrials(pulls, trials) {
+function simulateTrials(pulls, trials, initPity = 0, initGuaranteed = false) {
     const distribution        = {};
     const limitedBySuccesses  = {};
     const limitedDistribution = {};
@@ -128,8 +136,8 @@ function simulateTrials(pulls, trials) {
 
     for (let t = 0; t < trials; t++) {
         let successes                = 0;
-        let failuresSinceLastSuccess = 0;
-        let mustAwardLimited         = false;
+        let failuresSinceLastSuccess = initPity;
+        let mustAwardLimited         = initGuaranteed;
         let limitedThisTrial         = 0;
 
         for (let i = 0; i < pulls; i++) {
@@ -188,13 +196,13 @@ function wilsonInterval(k, n) {
 
 // ── Pull Estimation ───────────────────────────────────────────────────────────
 // Uses doubling search to find an upper bound, then binary search to narrow down.
-async function findMinimalPulls(targetLimited, desiredProb, trialsPerEval) {
+async function findMinimalPulls(targetLimited, desiredProb, trialsPerEval, initPity = 0, initGuaranteed = false) {
     const MAX_PULLS = 5000;
     if (targetLimited <= 0) return 0;
 
     let lo = 1, hi = 1;
     while (hi <= MAX_PULLS) {
-        const sim = simulateTrials(hi, trialsPerEval);
+        const sim = simulateTrials(hi, trialsPerEval, initPity, initGuaranteed);
         const p   = countSuccessfulTrials(sim.limitedDistribution, targetLimited) / sim.trials;
         if (p >= desiredProb) break;
         lo = hi + 1;
@@ -206,7 +214,7 @@ async function findMinimalPulls(targetLimited, desiredProb, trialsPerEval) {
     let result = null;
     while (lo <= hi) {
         const mid = Math.floor((lo + hi) / 2);
-        const sim = simulateTrials(mid, trialsPerEval);
+        const sim = simulateTrials(mid, trialsPerEval, initPity, initGuaranteed);
         const p   = countSuccessfulTrials(sim.limitedDistribution, targetLimited) / sim.trials;
         if (p >= desiredProb) { result = mid; hi = mid - 1; }
         else lo = mid + 1;
@@ -216,14 +224,16 @@ async function findMinimalPulls(targetLimited, desiredProb, trialsPerEval) {
 }
 
 if (estimateBtn) estimateBtn.addEventListener('click', async () => {
-    const targetLimited = Math.max(0, parseInt(targetLimitedInput?.value  || '1',  10));
-    const desiredPct    = Math.min(99, Math.max(1, parseFloat(targetConfidenceInput?.value || '90')));
-    const desiredProb   = desiredPct / 100;
-    const trialsPerEval = 20000;
+    const targetLimited  = Math.max(0, parseInt(targetLimitedInput?.value  || '1',  10));
+    const desiredPct     = Math.min(99, Math.max(1, parseFloat(targetConfidenceInput?.value || '90')));
+    const desiredProb    = desiredPct / 100;
+    const trialsPerEval  = 20000;
+    const initPity       = Math.min(79, Math.max(0, parseInt(pityCountInput?.value || '0', 10)));
+    const initGuaranteed = !!fiftyFiftyInput?.checked;
 
     estimateResult.textContent = 'Estimating… (this may take a moment)';
     try {
-        const pullsNeeded = await findMinimalPulls(targetLimited, desiredProb, trialsPerEval);
+        const pullsNeeded = await findMinimalPulls(targetLimited, desiredProb, trialsPerEval, initPity, initGuaranteed);
         if (pullsNeeded === null) {
             estimateResult.innerHTML = 'Could not find required pulls up to limit.';
             return;
@@ -250,12 +260,12 @@ if (estimateBtn) estimateBtn.addEventListener('click', async () => {
 
 // ── Probability Curves ────────────────────────────────────────────────────────
 // Returns P(>= k limited copies) per pull, for k = 1..maxLimited.
-function simulateCumulative(pullsMax, trials, maxLimited) {
+function simulateCumulative(pullsMax, trials, maxLimited, initPity = 0, initGuaranteed = false) {
     const countsPerK = Array.from({ length: maxLimited }, () => new Array(pullsMax).fill(0));
 
     for (let t = 0; t < trials; t++) {
-        let failuresSinceLastSuccess = 0;
-        let mustAwardLimited         = false;
+        let failuresSinceLastSuccess = initPity;
+        let mustAwardLimited         = initGuaranteed;
         let limitedCount             = 0;
 
         for (let i = 0; i < pullsMax; i++) {
@@ -414,11 +424,13 @@ function attachCurveTooltip(canvas) {
 // ── Plot Button ───────────────────────────────────────────────────────────────
 const plotBtn = document.getElementById('plot-curves');
 if (plotBtn) plotBtn.addEventListener('click', async () => {
-    const pullsMax   = Math.max(1, parseInt(simPullsInput?.value      || '100', 10));
-    const maxLimited = Math.max(1, parseInt(targetLimitedInput?.value || '1',   10));
+    const pullsMax       = Math.max(1, parseInt(simPullsInput?.value      || '100', 10));
+    const maxLimited     = Math.max(1, parseInt(targetLimitedInput?.value || '1',   10));
+    const initPity       = Math.min(79, Math.max(0, parseInt(pityCountInput?.value || '0', 10)));
+    const initGuaranteed = !!fiftyFiftyInput?.checked;
 
     plotBtn.textContent = 'Working…';
     await new Promise(r => setTimeout(r, 10));
-    drawCumulativeCurves(simulateCumulative(pullsMax, 100000, maxLimited), 'sim-curve');
+    drawCumulativeCurves(simulateCumulative(pullsMax, 100000, maxLimited, initPity, initGuaranteed), 'sim-curve');
     plotBtn.textContent = 'Calculate';
 });
