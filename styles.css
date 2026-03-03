@@ -6,9 +6,19 @@ body {
 }
 
 /* ── Header ── */
+@keyframes gradient-shift {
+    0%, 100% { background-position:   0% 50%; }
+    50%       { background-position: 100% 50%; }
+}
+
 .page-title {
-    color: #003e58;
     font-size: 2rem;
+    background: linear-gradient(90deg, #003e58, #0477a6, #0ea5e9, #0477a6, #003e58);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradient-shift 5s ease infinite;
 }
 
 /* ── Cards ── */

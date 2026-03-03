@@ -51,6 +51,23 @@ function renderPullTable() {
 // ── Roll Calculation ──────────────────────────────────────────────────────────
 const PRESET_KEY = 'rw_preset_v1';
 
+const animHandles = {};
+function animateNumber(el, to, key, formatFn = String) {
+    if (animHandles[key]) cancelAnimationFrame(animHandles[key]);
+    const from = parseFloat((el.dataset.rawVal ?? '').replace(/,/g, '')) || 0;
+    el.dataset.rawVal = String(to);
+    if (from === to) { el.textContent = formatFn(to); return; }
+    const start = performance.now();
+    function step(now) {
+        const t     = Math.min(1, (now - start) / 220);
+        const eased = 1 - (1 - t) * (1 - t);
+        el.textContent = formatFn(Math.round(from + (to - from) * eased));
+        animHandles[key] = t < 1 ? requestAnimationFrame(step) : null;
+        if (t >= 1) el.textContent = formatFn(to);
+    }
+    animHandles[key] = requestAnimationFrame(step);
+}
+
 function updateTableHighlight(rolls) {
     const cells   = document.querySelectorAll('td.pull-amount');
     const amounts = Array.from(cells).map(c => parseInt(c.textContent.trim(), 10) || 0);
@@ -73,13 +90,10 @@ function calculateRolls() {
     const remaining = astrites % 160;
     const afterglow = Math.floor(rolls * 0.6);
 
-    rollsResult.textContent    = rolls;
-    astritesResult.textContent = remaining;
-    try {
-        afterglowResult.textContent = new Intl.NumberFormat().format(afterglow);
-    } catch {
-        afterglowResult.textContent = String(afterglow);
-    }
+    animateNumber(rollsResult,    rolls,     'rolls');
+    animateNumber(astritesResult, remaining, 'remaining');
+    animateNumber(afterglowResult, afterglow, 'afterglow',
+        v => { try { return new Intl.NumberFormat().format(v); } catch { return String(v); } });
 
     updateTableHighlight(rolls);
     try {
@@ -231,6 +245,8 @@ if (estimateBtn) estimateBtn.addEventListener('click', async () => {
     const initPity       = Math.min(79, Math.max(0, parseInt(pityCountInput?.value || '0', 10)));
     const initGuaranteed = !!fiftyFiftyInput?.checked;
 
+    estimateBtn.disabled = true;
+    estimateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Estimating…';
     estimateResult.textContent = 'Estimating… (this may take a moment)';
     try {
         const pullsNeeded = await findMinimalPulls(targetLimited, desiredProb, trialsPerEval, initPity, initGuaranteed);
@@ -255,6 +271,9 @@ if (estimateBtn) estimateBtn.addEventListener('click', async () => {
             `95% CI: <strong>${(ci.lo * 100).toFixed(2)}%</strong> – <strong>${(ci.hi * 100).toFixed(2)}%</strong>`;
     } catch (e) {
         estimateResult.textContent = 'Estimation failed: ' + (e?.message ?? String(e));
+    } finally {
+        estimateBtn.disabled = false;
+        estimateBtn.innerHTML = '<i class="bi bi-lightning-charge"></i> Estimate Astrites';
     }
 });
 
@@ -429,8 +448,10 @@ if (plotBtn) plotBtn.addEventListener('click', async () => {
     const initPity       = Math.min(79, Math.max(0, parseInt(pityCountInput?.value || '0', 10)));
     const initGuaranteed = !!fiftyFiftyInput?.checked;
 
-    plotBtn.textContent = 'Working…';
+    plotBtn.disabled = true;
+    plotBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Working…';
     await new Promise(r => setTimeout(r, 10));
     drawCumulativeCurves(simulateCumulative(pullsMax, 100000, maxLimited, initPity, initGuaranteed), 'sim-curve');
-    plotBtn.textContent = 'Calculate';
+    plotBtn.disabled = false;
+    plotBtn.innerHTML = '<i class="bi bi-play-fill"></i> Calculate';
 });
