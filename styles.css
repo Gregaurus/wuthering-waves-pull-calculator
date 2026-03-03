@@ -1,8 +1,26 @@
 /* ── Custom overrides on top of Bootstrap 5 ── */
 
 body {
-    background: #eef2f7;
+    background: linear-gradient(160deg, #0a0818 0%, #130d2a 60%, #0a0e1e 100%);
+    min-height: 100vh;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* ── Starfield ── */
+#starfield {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+.page-subtitle {
+    color: #d8b4fe;
 }
 
 /* ── Header ── */
@@ -13,7 +31,7 @@ body {
 
 .page-title {
     font-size: 2rem;
-    background: linear-gradient(90deg, #003e58, #0477a6, #0ea5e9, #0477a6, #003e58);
+    background: linear-gradient(90deg, #4a0080, #9333ea, #e879f9, #f0abfc, #e879f9, #9333ea, #4a0080);
     background-size: 300% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -28,14 +46,14 @@ body {
 }
 
 .card-header.section-header {
-    background: #f0f7ff;
-    border-bottom: 2px solid #dbeafe;
+    background: #fdf4ff;
+    border-bottom: 2px solid #e9d5ff;
     border-radius: 12px 12px 0 0 !important;
     padding: 12px 20px;
 }
 
 .card-header.section-header h5 {
-    color: #0477a6;
+    color: #9333ea;
     font-size: 1rem;
 }
 
@@ -66,7 +84,7 @@ body {
 
 /* ── Table ── */
 #pull-table thead {
-    background-color: #0477a6;
+    background-color: #7e22ce;
     color: #fff;
 }
 
@@ -97,41 +115,41 @@ body {
 
 /* ── Inputs ── */
 .form-control:focus {
-    border-color: #0477a6;
-    box-shadow: 0 0 0 3px rgba(4, 119, 166, 0.18);
+    border-color: #9333ea;
+    box-shadow: 0 0 0 3px rgba(147, 51, 234, 0.18);
 }
 
 /* ── Buttons ── */
 .btn-primary {
-    background-color: #0477a6;
-    border-color: #0477a6;
+    background-color: #9333ea;
+    border-color: #9333ea;
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
-    background-color: #035e85;
-    border-color: #035e85;
+    background-color: #7e22ce;
+    border-color: #7e22ce;
 }
 
 .btn-outline-primary {
-    color: #0477a6;
-    border-color: #0477a6;
+    color: #9333ea;
+    border-color: #9333ea;
 }
 
 .btn-outline-primary:hover {
-    background-color: #0477a6;
-    border-color: #0477a6;
+    background-color: #9333ea;
+    border-color: #9333ea;
 }
 
 /* ── Simulation results text ── */
 .sim-results {
     font-size: 0.9rem;
-    color: #003e58;
+    color: #2d1557;
     line-height: 1.7;
 }
 
 .sim-results strong {
-    color: #0477a6;
+    color: #9333ea;
 }
 
 /* ── Canvas ── */
@@ -154,7 +172,7 @@ body {
 .sim-hist-label {
     font-weight: 700;
     font-size: 0.85rem;
-    color: #003e58;
+    color: #2d1557;
     margin-bottom: 4px;
 }
 

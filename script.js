@@ -455,3 +455,73 @@ if (plotBtn) plotBtn.addEventListener('click', async () => {
     plotBtn.disabled = false;
     plotBtn.innerHTML = '<i class="bi bi-play-fill"></i> Calculate';
 });
+
+// ── Starfield ─────────────────────────────────────────────────────────────────
+(function initStarfield() {
+    const canvas = document.getElementById('starfield');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const STAR_COUNT = 180;
+    let W = 0, H = 0, scrollY = 0;
+    const stars = [];
+
+    function resize() {
+        const dpr  = window.devicePixelRatio || 1;
+        W = window.innerWidth;
+        H = window.innerHeight;
+        canvas.width  = Math.round(W * dpr);
+        canvas.height = Math.round(H * dpr);
+        canvas.style.width  = W + 'px';
+        canvas.style.height = H + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function makeStars() {
+        stars.length = 0;
+        for (let i = 0; i < STAR_COUNT; i++) {
+            const size = Math.random() * 1.7 + 0.2;
+            stars.push({
+                x:     Math.random() * W,
+                y:     Math.random() * H,
+                size,
+                layer: Math.random() * 0.8 + 0.2,   // 0.2 = far/slow, 1.0 = near/fast
+                phase: Math.random() * Math.PI * 2,
+                speed: Math.random() * 0.0012 + 0.0004,
+                glow:  size > 1.3,
+            });
+        }
+    }
+
+    window.addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive: true });
+    window.addEventListener('resize', () => { resize(); makeStars(); });
+
+    let last = 0;
+    function frame(now) {
+        const dt = Math.min(now - last, 50);
+        last = now;
+        ctx.clearRect(0, 0, W, H);
+
+        for (const s of stars) {
+            s.phase += s.speed * dt;
+            const alpha = (0.3 + 0.7 * (0.5 + 0.5 * Math.sin(s.phase))) * s.layer;
+            const drawY = ((s.y - scrollY * s.layer * 0.18) % H + H) % H;
+
+            if (s.glow) {
+                ctx.shadowBlur  = 7;
+                ctx.shadowColor = `rgba(230, 180, 255, ${alpha * 0.7})`;
+            }
+            ctx.beginPath();
+            ctx.arc(s.x, drawY, s.size, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+            ctx.fill();
+            if (s.glow) ctx.shadowBlur = 0;
+        }
+
+        requestAnimationFrame(frame);
+    }
+
+    resize();
+    makeStars();
+    requestAnimationFrame(frame);
+})();
