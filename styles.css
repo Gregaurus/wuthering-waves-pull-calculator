@@ -1,259 +1,191 @@
+/* ── Custom overrides on top of Bootstrap 5 ── */
+
 body {
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
-    margin: 0;
-    padding: 0;
-    background: #f4f4f4;
-    color: black;
+    background: #eef2f7;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-.container {
-    max-width: 500px;
-    margin: 50px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-    text-align: center;
-    color: #410000;
-}
-
-label {
-    font-weight: bold;
-    display: block;
-    margin: 10px 0 5px;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    font-size: 16px;
-}
-
-input:focus {
-    border-color: aquamarine;
-    outline: none;
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-}
-
-.result-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 20px;
-    justify-content: space-between;
-}
-
-.result-box {
-    text-align: center;
-    margin-bottom: 20px;
-    flex: 1 1 30%;
-    min-width: 0; /* allow shrinking on small screens */
-}
-
-.result-title {
-    display: flex;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 5px;
+/* ── Header ── */
+.page-title {
     color: #003e58;
+    font-size: 2rem;
 }
 
-.result-value {
-    font-size: 24px;
-    font-weight: bold;
-    color: #007bff;
+/* ── Cards ── */
+.card {
+    border: none;
+    border-radius: 12px;
 }
 
-/* Responsive adjustments for small screens */
-@media (max-width: 480px) {
-    .container { margin: 20px 12px; padding: 16px; }
-    .result-box { flex-basis: 100%; }
-    .result-title { font-size: 14px; }
-    .result-value { font-size: 20px; word-break: break-word; }
-    .small-input { width: 70px; }
+.card-header.section-header {
+    background: #f0f7ff;
+    border-bottom: 2px solid #dbeafe;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 12px 20px;
 }
 
-.table-container {
-    margin-top: 10px;
-    overflow-x: auto;
+.card-header.section-header h5 {
+    color: #0477a6;
+    font-size: 1rem;
 }
 
-.table-container h2 {
-    font-size: 25px;
-    margin: 0 0 8px 0;
-    color: #0070a0;
+/* ── Result cards ── */
+.result-card {
+    border-radius: 12px;
+    transition: transform 0.15s ease;
 }
 
-#pull-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-    min-width: 350px;
-    white-space: nowrap;
+.result-card:hover {
+    transform: translateY(-2px);
 }
 
-#pull-table th, #pull-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
+.result-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.result-number {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+/* ── Table ── */
+#pull-table thead {
+    background-color: #0477a6;
+    color: #fff;
 }
 
 #pull-table thead th {
-    background-color: #007bff;
-    color: white;
-}
-
-/* Accessibility & UI helper styles */
-.btn {
-    padding: 8px 12px;
-    border-radius: 6px;
-    border: 1px solid #0477a6;
-    background: #ffffff;
-    color: #0477a6;
-    cursor: pointer;
+    font-size: 0.82rem;
     font-weight: 600;
-}
-.btn.primary {
-    background: #0477a6;
-    color: #fff;
-}
-.btn.secondary {
-    background: #f8f9fb;
-    color: #333;
-    border-color: #ccc;
-}
-.btn:focus {
-    outline: 3px solid #9ee7ff;
-    outline-offset: 2px;
-}
-
-.preset-controls {
-    margin-top: 8px;
-    display: flex;
-    gap: 8px;
-}
-
-.small-input {
-    width: 90px;
-    padding: 6px;
-}
-
-.sim-controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: 8px;
-}
-
-.sim-results {
-    margin-top: 12px;
-    font-size: 14px;
-    color: #003e58;
-}
-
-.visually-hidden {
-    position: absolute !important;
-    height: 1px; width: 1px;
-    overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
-    white-space: nowrap; border: 0; padding: 0; margin: -1px;
-}
-
-#pull-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 14px;
-    min-width: 350px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
     white-space: nowrap;
 }
 
-#pull-table th, #pull-table td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: center;
-}
-
-#pull-table tbody tr:nth-child(odd) {
-    background: #fafafa;
+#pull-table td {
+    font-size: 0.9rem;
+    vertical-align: middle;
+    white-space: nowrap;
 }
 
 .highlight {
-    background-color: #c6f6d5 !important; /* green-ish */
+    background-color: #d1fae5 !important;
+    color: #065f46;
+    font-weight: 600;
 }
 
 .table-highlight {
-    background-color: #c6f6d5 !important;
+    outline: 2px solid #34d399;
+    border-radius: 4px;
 }
 
-/* Histogram canvas for simulation distribution */
-#sim-histogram {
-    width: 100%;
-    height: 160px;
-    margin-top: 8px;
-    background: #fff;
-    border: 1px solid #ddd;
-    display: block;
+/* ── Inputs ── */
+.form-control:focus {
+    border-color: #0477a6;
+    box-shadow: 0 0 0 3px rgba(4, 119, 166, 0.18);
 }
 
+/* ── Buttons ── */
+.btn-primary {
+    background-color: #0477a6;
+    border-color: #0477a6;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #035e85;
+    border-color: #035e85;
+}
+
+.btn-outline-primary {
+    color: #0477a6;
+    border-color: #0477a6;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0477a6;
+    border-color: #0477a6;
+}
+
+/* ── Simulation results text ── */
+.sim-results {
+    font-size: 0.9rem;
+    color: #003e58;
+    line-height: 1.7;
+}
+
+.sim-results strong {
+    color: #0477a6;
+}
+
+/* ── Canvas ── */
 #sim-curve {
     width: 100%;
     height: 240px;
-    margin-top: 8px;
     background: #fff;
-    border: 1px solid #ddd;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
     display: block;
     box-sizing: border-box;
     max-width: 100%;
-}
-
-.sim-visual {
-    display: flex;
-    gap: 12px;
-    margin-top: 8px;
-    align-items: flex-start;
-    flex-wrap: wrap;
-}
-.sim-hist-block {
-    flex: 1 1 260px;
-    min-width: 220px;
+    margin-top: 6px;
 }
 
 .sim-hist-block {
     position: relative;
 }
 
+.sim-hist-label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #003e58;
+    margin-bottom: 4px;
+}
+
+/* ── Canvas tooltip ── */
 .canvas-tooltip {
     position: absolute;
     pointer-events: none;
-    background: rgba(255,255,255,0.95);
-    border: 1px solid #ccc;
-    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
     font-size: 12px;
     color: #222;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    border-radius: 6px;
     z-index: 50;
     white-space: nowrap;
     max-width: 320px;
 }
-.sim-hist-label {
-    font-weight: 700;
-    color: #003e58;
-    margin-bottom: 6px;
+
+/* ── Accessibility ── */
+.visually-hidden {
+    position: absolute !important;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap;
+    border: 0;
+    padding: 0;
+    margin: -1px;
 }
+
+/* ── Unused canvas elements kept for script compatibility ── */
+#sim-histogram,
 #sim-histogram-limited {
-    width: 100%;
-    height: 160px;
-    margin-top: 0px;
-    background: #fff;
-    border: 1px solid #ddd;
-    display: block;
+    display: none;
+}
+
+/* ── Responsive tweaks ── */
+@media (max-width: 480px) {
+    .result-number { font-size: 1.4rem; }
+    .result-label  { font-size: 0.65rem; }
+    .page-title    { font-size: 1.5rem; }
 }

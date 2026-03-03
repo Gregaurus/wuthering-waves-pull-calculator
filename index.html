@@ -3,111 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Calculation</title>
+    <title>Roll Calculator</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Calculate Roll</h1>
-        <label for="astrites">Astrites: </label>
-        <input type="number" id="astrites" placeholder="Enter Astrites Amount">
-        <label for="rTide">Radiant Tides: </label>
-        <input type="number" id="rTide" placeholder="Enter Radiant Tides Amount">
+    <div class="container py-4 py-md-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-8 col-xl-7">
 
-        <!-- Presets now autosave on input changes -->
-
-        <div class="result-container" role="region" aria-label="Calculation results">
-            <div class="result-box">
-                <span class="result-title">Pulls</span>
-                <span class="result-value" id="rolls-result" role="status" aria-live="polite">0</span>
-            </div>
-            <div class="result-box">
-                <span class="result-title">Remaining Astrites</span>
-                <span class="result-value" id="remaining-astrites" role="status" aria-live="polite">0</span>
-            </div>
-                <div class="result-box">
-                    <span class="result-title">Estimated Afterglow Crystals</span>
-                <span class="result-value" id="bonus-afterglow" role="status" aria-live="polite">0</span>
-            </div>
-        </div>
-
-        <!-- Pull Rate table (reinserted) -->
-        <div class="table-container">
-            <h2>Pull Rate</h2>
-            <table id="pull-table" role="table" aria-describedby="pull-desc">
-                <caption id="pull-desc" class="visually-hidden">Table of pull costs by copy count</caption>
-                <thead>
-                    <tr>
-                        <th>Copies</th>
-                        <th>Lose Pity</th>
-                        <th>Partial Pity</th>
-                        <th>Win Pity</th>
-                        <th>Average Pull</th>
-                    </tr>
-                </thead>
-                <tbody id="pull-table-body">
-                    <!-- Rows are rendered dynamically by script.js from a data array -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- move `target-limited` input above Pull Estimation so it's shared -->
-        <div style="margin-top:12px;">
-            <label for="target-limited">How many limited 5 stars:</label>
-            <input type="number" id="target-limited" value="1" min="0" class="small-input">
-        </div>
-
-        <div class="estimation-container">
-                <div class="estimation-container">
-            <h2>Pull Estimation</h2>
-            <!-- <div class="sim-controls">
-                <label for="target-limited">How many limited 5 stars:</label>
-                <input type="number" id="target-limited" value="1" min="0" class="small-input"> -->
-
-                <label for="target-confidence">How great are the chances (%)</label>
-                <input type="number" id="target-confidence" value="90" min="1" max="99" class="small-input">
-
-                <!-- <label for="sim-trials">Trials (per evaluation):</label>
-                <input type="number" id="sim-trials-est" value="100000" min="100" class="small-input"> -->
-
-                <button id="estimate-astrites" type="button" class="btn secondary">Estimate Astrites</button>
-            </div>
-            <div id="estimate-result" class="sim-results" role="region" aria-live="polite"></div>
-        </div>
-
-        <div class="simulation-container">
-            <h2>Banner Pull Trial</h2>
-                <div class="sim-controls">
-                <label for="sim-pulls">Pulls per Trial:</label>
-                <input type="number" id="sim-pulls" value="100" min="1" class="small-input">
-
-                <!-- <label for="sim-trials">Trials:</label>
-                <input type="number" id="sim-trials" value="100000" min="1" class="small-input"> -->
-                <!-- <button id="run-sim" type="button" class="btn primary">Run Simulation</button> -->
-            </div>
-            <div id="sim-results" class="sim-results" role="region" aria-live="polite"></div>
-            <div class="sim-visual">
-                <div style="width:100%;display:flex;gap:8px;align-items:center;margin-bottom:8px;">
-                    <button id="plot-curves" type="button" class="btn">Calculate</button>
+                <!-- Header -->
+                <div class="text-center mb-4">
+                    <h1 class="fw-bold page-title">Calculate Roll</h1>
+                    <p class="text-muted mb-0">Plan your pulls and estimate your resources</p>
                 </div>
-                <!--
-                    <div class="sim-hist-block">
-                        <div class="sim-hist-label">Total 5 Star Copies</div>
-                        <canvas id="sim-histogram" width="600" height="160" aria-hidden="true"></canvas>
+
+                <!-- Inputs Card -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <label for="astrites" class="form-label fw-semibold">Astrites</label>
+                                <input type="number" id="astrites" class="form-control" placeholder="Enter Astrites amount">
+                            </div>
+                            <div class="col-sm-6">
+                                <label for="rTide" class="form-label fw-semibold">Radiant Tides</label>
+                                <input type="number" id="rTide" class="form-control" placeholder="Enter Radiant Tides amount">
+                            </div>
+                        </div>
                     </div>
-                    <div class="sim-hist-block">
-                        <div class="sim-hist-label">Total Limited 5 Star Copies</div>
-                        <canvas id="sim-histogram-limited" width="600" height="160" aria-hidden="true"></canvas>
-                    </div>
-                -->
-                <div class="sim-hist-block" style="flex-basis:100%;">
-                    <div class="sim-hist-label">Cumulative Limited Probability Curves</div>
-                    <canvas id="sim-curve" height="240" aria-hidden="true"></canvas>
-                    <div id="sim-curve-tooltip" class="canvas-tooltip" aria-hidden="true" style="display:none"></div>
                 </div>
+
+                <!-- Results Row -->
+                <div class="row g-3 mb-4" role="region" aria-label="Calculation results">
+                    <div class="col-4">
+                        <div class="card text-center shadow-sm h-100 result-card">
+                            <div class="card-body py-3">
+                                <div class="result-label">Pulls</div>
+                                <div class="result-number text-primary" id="rolls-result" role="status" aria-live="polite">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card text-center shadow-sm h-100 result-card">
+                            <div class="card-body py-3">
+                                <div class="result-label">Remaining Astrites</div>
+                                <div class="result-number text-warning" id="remaining-astrites" role="status" aria-live="polite">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card text-center shadow-sm h-100 result-card">
+                            <div class="card-body py-3">
+                                <div class="result-label">Afterglow Crystals</div>
+                                <div class="result-number text-success" id="bonus-afterglow" role="status" aria-live="polite">0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pull Rate Table Card -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header section-header">
+                        <h5 class="mb-0"><i class="bi bi-table me-2"></i>Pull Rate</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table id="pull-table" class="table table-striped table-hover table-bordered mb-0" role="table" aria-describedby="pull-desc">
+                                <caption id="pull-desc" class="visually-hidden">Table of pull costs by copy count</caption>
+                                <thead>
+                                    <tr>
+                                        <th>Copies</th>
+                                        <th>Lose Pity</th>
+                                        <th>Partial Pity</th>
+                                        <th>Win Pity</th>
+                                        <th>Average Pull</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pull-table-body">
+                                    <!-- Rows are rendered dynamically by script.js -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shared target limited input -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body py-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <label for="target-limited" class="form-label fw-semibold mb-0 text-nowrap">Limited 5-stars to target:</label>
+                            <input type="number" id="target-limited" value="1" min="0" class="form-control form-control-sm" style="max-width: 100px;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pull Estimation Card -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header section-header">
+                        <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Pull Estimation</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-3 align-items-end">
+                            <div>
+                                <label for="target-confidence" class="form-label fw-semibold">Confidence (%)</label>
+                                <input type="number" id="target-confidence" value="90" min="1" max="99" class="form-control form-control-sm" style="max-width: 110px;">
+                            </div>
+                            <div>
+                                <button id="estimate-astrites" type="button" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-lightning-charge"></i> Estimate Astrites
+                                </button>
+                            </div>
+                        </div>
+                        <div id="estimate-result" class="sim-results mt-3" role="region" aria-live="polite"></div>
+                    </div>
+                </div>
+
+                <!-- Banner Pull Trial Card -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header section-header">
+                        <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Banner Pull Trial</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex flex-wrap gap-3 align-items-end">
+                            <div>
+                                <label for="sim-pulls" class="form-label fw-semibold">Pulls per Trial</label>
+                                <input type="number" id="sim-pulls" value="100" min="1" class="form-control form-control-sm" style="max-width: 110px;">
+                            </div>
+                            <div>
+                                <button id="plot-curves" type="button" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-play-fill"></i> Calculate
+                                </button>
+                            </div>
+                        </div>
+                        <div id="sim-results" class="sim-results mt-3" role="region" aria-live="polite"></div>
+                        <div class="sim-visual mt-3">
+                            <div class="sim-hist-block position-relative">
+                                <div class="sim-hist-label">Cumulative Limited Probability Curves</div>
+                                <canvas id="sim-curve" height="240" aria-hidden="true"></canvas>
+                                <div id="sim-curve-tooltip" class="canvas-tooltip" aria-hidden="true" style="display:none"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
-</html> 
+</html>
